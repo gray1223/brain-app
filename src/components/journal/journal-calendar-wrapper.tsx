@@ -23,7 +23,7 @@ export function JournalCalendarWrapper({
           hasEntry:
             "bg-primary/20 text-primary font-semibold dark:bg-primary/30",
         }}
-        onSelect={(date) => {
+        onSelect={(date: Date | undefined) => {
           if (date) {
             router.push(`/journal/${format(date, "yyyy-MM-dd")}`);
           }
