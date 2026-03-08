@@ -111,9 +111,9 @@ function StudyConfigScreen({
   backLink: string;
   isPractice: boolean;
 }) {
-  const [mode, setMode] = useState<StudyMode>("flip");
+  const [mode, setMode] = useState<StudyMode>("type");
   const [questionSide, setQuestionSide] = useState<QuestionSide>("front");
-  const [cardOrder, setCardOrder] = useState<CardOrder>("due");
+  const [cardOrder, setCardOrder] = useState<CardOrder>("random");
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
@@ -266,14 +266,21 @@ function StudyConfigScreen({
         </div>
       </Card>
 
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={() => onStart({ mode, questionSide, cardOrder })}
-      >
-        <GraduationCap className="size-4" data-icon="inline-start" />
-        Start Studying
-      </Button>
+      <div className="space-y-2">
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={() => onStart({ mode, questionSide, cardOrder })}
+        >
+          <GraduationCap className="size-4" data-icon="inline-start" />
+          Start Studying
+        </Button>
+        <p className="text-center text-[11px] text-muted-foreground">
+          {mode === "type"
+            ? "You'll type your answer and AI will grade it"
+            : "You'll flip cards and rate yourself"}
+        </p>
+      </div>
     </div>
   );
 }
