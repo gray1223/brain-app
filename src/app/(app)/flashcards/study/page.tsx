@@ -369,40 +369,36 @@ export default function StudyPage() {
       {/* Rating buttons */}
       {flipped ? (
         <div className="space-y-3">
-          <div className="grid grid-cols-4 gap-2">
-            <Button
-              variant="outline"
-              className="flex flex-col gap-0.5 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
+          <div className="grid grid-cols-4 gap-3">
+            <button
+              className="flex flex-col items-center justify-center gap-1 rounded-lg border border-input bg-background px-3 py-4 text-red-600 shadow-sm transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
               onClick={() => handleRate(0)}
             >
               <RotateCcw className="size-4" />
-              <span className="text-xs">Again</span>
+              <span className="text-xs font-medium">Again</span>
               <span className="text-[10px] text-muted-foreground">1</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="flex flex-col gap-0.5 py-3 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-950"
+            </button>
+            <button
+              className="flex flex-col items-center justify-center gap-1 rounded-lg border border-input bg-background px-3 py-4 text-orange-600 shadow-sm transition-colors hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-950"
               onClick={() => handleRate(1)}
             >
               <span className="text-sm font-medium">Hard</span>
               <span className="text-[10px] text-muted-foreground">2</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="flex flex-col gap-0.5 py-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+            </button>
+            <button
+              className="flex flex-col items-center justify-center gap-1 rounded-lg border border-input bg-background px-3 py-4 text-blue-600 shadow-sm transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
               onClick={() => handleRate(2)}
             >
               <span className="text-sm font-medium">Good</span>
               <span className="text-[10px] text-muted-foreground">3</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="flex flex-col gap-0.5 py-3 text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-950"
+            </button>
+            <button
+              className="flex flex-col items-center justify-center gap-1 rounded-lg border border-input bg-background px-3 py-4 text-green-600 shadow-sm transition-colors hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-950"
               onClick={() => handleRate(3)}
             >
               <span className="text-sm font-medium">Easy</span>
               <span className="text-[10px] text-muted-foreground">4</span>
-            </Button>
+            </button>
           </div>
 
           {lastNextReview && (
