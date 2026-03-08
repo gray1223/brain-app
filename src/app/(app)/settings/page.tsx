@@ -18,7 +18,7 @@ export default async function SettingsPage() {
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   return (
     <div className="flex flex-col gap-6">

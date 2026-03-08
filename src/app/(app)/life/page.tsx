@@ -63,7 +63,7 @@ export default async function LifePage() {
       .from("profiles")
       .select("*")
       .eq("id", user.id)
-      .single(),
+      .maybeSingle(),
 
     // Recent notes (5)
     supabase
