@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import { CreateEventDialog } from "@/components/calendar/create-event-dialog";
-import { Button } from "@/components/ui/button";
-import { CalendarDays, RefreshCw } from "lucide-react";
+import { SyncButton } from "@/components/calendar/sync-button";
+import { CalendarDays } from "lucide-react";
 
 export default async function CalendarPage() {
   const supabase = await createClient();
@@ -44,16 +44,5 @@ export default async function CalendarPage() {
         initialYear={year}
       />
     </div>
-  );
-}
-
-function SyncButton() {
-  return (
-    <form action="/api/calendar/sync" method="POST">
-      <Button variant="outline" type="submit">
-        <RefreshCw className="size-4" />
-        Sync with Google
-      </Button>
-    </form>
   );
 }

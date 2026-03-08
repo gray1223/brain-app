@@ -103,7 +103,7 @@ export function CalendarView({
           {format(currentDate, "MMMM yyyy")}
         </h2>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-sm" onClick={goToPrevMonth}>
+          <Button variant="ghost" size="icon" onClick={goToPrevMonth}>
             <ChevronLeft className="size-4" />
           </Button>
           <Button
@@ -117,7 +117,7 @@ export function CalendarView({
           >
             Today
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={goToNextMonth}>
+          <Button variant="ghost" size="icon" onClick={goToNextMonth}>
             <ChevronRight className="size-4" />
           </Button>
         </div>
