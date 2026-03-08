@@ -49,6 +49,15 @@ export default async function DeckDetailPage({
   const today = new Date().toISOString().split("T")[0];
   const dueCards = cards.filter((c) => c.next_review <= today);
   const masteredCards = cards.filter((c) => c.interval_days > 21);
+  const newCards = cards.filter(
+    (c) => c.interval_days === 0 || c.review_count === 0
+  );
+  const learningCards = cards.filter(
+    (c) =>
+      c.interval_days > 0 &&
+      c.interval_days <= 21 &&
+      c.review_count > 0
+  );
   const masteryPercent =
     cards.length > 0 ? Math.round((masteredCards.length / cards.length) * 100) : 0;
 
@@ -71,7 +80,7 @@ export default async function DeckDetailPage({
               {deck.description}
             </p>
           )}
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               {cards.length} card{cards.length !== 1 ? "s" : ""}
             </Badge>
@@ -80,7 +89,19 @@ export default async function DeckDetailPage({
                 {dueCards.length} due
               </Badge>
             )}
-            <Badge variant="secondary">{masteryPercent}% mastered</Badge>
+            {newCards.length > 0 && (
+              <Badge variant="secondary" className="text-red-600 dark:text-red-400">
+                {newCards.length} new
+              </Badge>
+            )}
+            {learningCards.length > 0 && (
+              <Badge variant="secondary" className="text-yellow-600 dark:text-yellow-400">
+                {learningCards.length} learning
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-green-600 dark:text-green-400">
+              {masteryPercent}% mastered
+            </Badge>
           </div>
         </div>
       </div>
@@ -101,11 +122,19 @@ export default async function DeckDetailPage({
 
       {/* Action buttons */}
       <div className="flex flex-wrap items-center gap-2">
-        {dueCards.length > 0 && (
-          <Button render={<Link href={`/flashcards/study?deck=${deck.id}`} />}>
+        {dueCards.length > 0 ? (
+          <Button
+            size="lg"
+            render={<Link href={`/flashcards/study?deck=${deck.id}`} />}
+          >
             <GraduationCap className="size-4" data-icon="inline-start" />
-            Study This Deck ({dueCards.length} due)
+            Study Now ({dueCards.length} due)
           </Button>
+        ) : (
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/25 px-4 py-2.5 text-sm text-muted-foreground">
+            <GraduationCap className="size-4" />
+            No cards due — all caught up!
+          </div>
         )}
         <CreateCardDialog decks={[deck]} />
         <AIGenerateDialog deckId={deck.id} />
@@ -115,10 +144,10 @@ export default async function DeckDetailPage({
       <Tabs defaultValue="all">
         <TabsList>
           <TabsTrigger value="all">
-            All Cards ({cards.length})
+            All ({cards.length})
           </TabsTrigger>
           <TabsTrigger value="due">
-            Due for Review ({dueCards.length})
+            Due ({dueCards.length})
           </TabsTrigger>
           <TabsTrigger value="mastered">
             Mastered ({masteredCards.length})

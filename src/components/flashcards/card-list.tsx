@@ -41,7 +41,7 @@ function getMasteryColor(card: Flashcard) {
 
 function getMasteryLabel(card: Flashcard) {
   if (card.interval_days === 0 || card.review_count === 0) {
-    return "New / Failed";
+    return "New";
   }
   if (card.interval_days > 21) {
     return "Mastered";
@@ -143,9 +143,9 @@ export function CardList({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="next_review">Next Review</SelectItem>
-              <SelectItem value="created_at">Created Date</SelectItem>
-              <SelectItem value="ease_factor">Ease Factor</SelectItem>
+              <SelectItem value="next_review">Due Date</SelectItem>
+              <SelectItem value="created_at">Newest First</SelectItem>
+              <SelectItem value="ease_factor">Difficulty</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -230,23 +230,30 @@ export function CardList({
 
                 {isExpanded && (
                   <div className="mt-3 flex items-center justify-between border-t pt-3">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       <span>
-                        Ease: {card.ease_factor.toFixed(2)}
+                        Ease {card.ease_factor.toFixed(2)}
                       </span>
                       <span>
-                        Interval: {card.interval_days}d
+                        {card.interval_days === 0
+                          ? "New"
+                          : card.interval_days === 1
+                            ? "1 day interval"
+                            : `${card.interval_days} day interval`}
                       </span>
                       <span>
-                        Reviews: {card.review_count}
+                        {card.review_count === 0
+                          ? "Not yet reviewed"
+                          : card.review_count === 1
+                            ? "Reviewed once"
+                            : `Reviewed ${card.review_count} times`}
                       </span>
                       <span>
-                        Next:{" "}
                         {isDue
-                          ? "Now"
-                          : formatDistanceToNow(new Date(card.next_review), {
+                          ? "Due now"
+                          : `Next review ${formatDistanceToNow(new Date(card.next_review), {
                               addSuffix: true,
-                            })}
+                            })}`}
                       </span>
                     </div>
                     <div className="flex gap-1">

@@ -4,7 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreateDeckDialog } from "@/components/flashcards/create-deck-dialog";
-import { Layers, GraduationCap, TrendingUp, Calendar, BookOpen } from "lucide-react";
+import {
+  Layers,
+  GraduationCap,
+  TrendingUp,
+  Calendar,
+  BookOpen,
+  Play,
+} from "lucide-react";
 import Link from "next/link";
 import type { FlashcardDeck, Flashcard } from "@/types/database";
 
@@ -32,19 +39,6 @@ export default async function FlashcardsPage() {
   const today = new Date().toISOString().split("T")[0];
   const totalDue = cards.filter((c) => c.next_review <= today).length;
   const totalMastered = cards.filter((c) => c.interval_days > 21).length;
-
-  // Calculate streak: count consecutive days (backward from today) that have reviews
-  let streak = 0;
-  if (cards.length > 0) {
-    const reviewedCards = cards.filter((c) => c.review_count > 0);
-    if (reviewedCards.length > 0) {
-      // Simple streak based on cards with reviews — approximate
-      streak = Math.min(
-        reviewedCards.length,
-        Math.floor(reviewedCards.reduce((sum, c) => sum + c.review_count, 0) / Math.max(reviewedCards.length, 1))
-      );
-    }
-  }
 
   function getCardCount(deckId: string) {
     return cards.filter((c) => c.deck_id === deckId).length;
@@ -102,8 +96,8 @@ export default async function FlashcardsPage() {
 
       {/* Study all due button */}
       {totalDue > 0 && (
-        <Button render={<Link href="/flashcards/study" />} className="w-full">
-          <GraduationCap className="size-4" data-icon="inline-start" />
+        <Button render={<Link href="/flashcards/study" />} className="w-full" size="lg">
+          <GraduationCap className="size-5" data-icon="inline-start" />
           Study All Due Cards ({totalDue})
         </Button>
       )}
@@ -112,7 +106,7 @@ export default async function FlashcardsPage() {
       {decks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Layers className="mb-4 size-12 text-muted-foreground/50" />
-          <h3 className="text-sm font-medium">No decks yet</h3>
+          <h3 className="text-lg font-medium">No decks yet</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Create your first flashcard deck to get started.
           </p>
@@ -125,8 +119,8 @@ export default async function FlashcardsPage() {
             const masteryPercent = getMasteryPercent(deck.id);
 
             return (
-              <Link key={deck.id} href={`/flashcards/${deck.id}`}>
-                <Card className="p-4 transition-colors hover:bg-muted/50">
+              <Card key={deck.id} className="p-4 transition-colors hover:bg-muted/50">
+                <Link href={`/flashcards/${deck.id}`} className="block">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-medium">{deck.name}</h3>
                     {deck.description && (
@@ -169,8 +163,19 @@ export default async function FlashcardsPage() {
                       </div>
                     )}
                   </div>
-                </Card>
-              </Link>
+                </Link>
+
+                {/* Quick study button */}
+                {dueCount > 0 && (
+                  <Link
+                    href={`/flashcards/study?deck=${deck.id}`}
+                    className="mt-3 flex items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Play className="size-3" />
+                    Study {dueCount} due card{dueCount !== 1 ? "s" : ""}
+                  </Link>
+                )}
+              </Card>
             );
           })}
         </div>
