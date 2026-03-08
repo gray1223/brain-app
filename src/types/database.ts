@@ -16,6 +16,8 @@ export interface Note {
   tags: string[];
   parent_id: string | null;
   is_archived: boolean;
+  is_pinned: boolean;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +52,8 @@ export interface Todo {
   parent_id: string | null;
   order_index: number;
   recurrence: string | null;
+  is_pinned: boolean;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +89,8 @@ export interface Project {
   description: string | null;
   status: "planning" | "active" | "paused" | "completed" | "archived";
   color: string | null;
+  is_pinned: boolean;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -169,4 +175,69 @@ export interface IdeaBoard {
   description: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface Habit {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  frequency: "daily" | "weekly";
+  color: string;
+  target_count: number;
+  is_archived: boolean;
+  created_at: string;
+}
+
+export interface HabitCompletion {
+  id: string;
+  habit_id: string;
+  user_id: string;
+  completed_date: string;
+  count: number;
+  created_at: string;
+}
+
+export interface Capture {
+  id: string;
+  user_id: string;
+  content: string;
+  processed: boolean;
+  converted_to: "note" | "todo" | "bookmark" | null;
+  converted_id: string | null;
+  created_at: string;
+}
+
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  url: string;
+  title: string;
+  description: string | null;
+  tags: string[];
+  is_read: boolean;
+  is_favorite: boolean;
+  created_at: string;
+}
+
+export interface FlashcardDeck {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Flashcard {
+  id: string;
+  deck_id: string;
+  user_id: string;
+  front: string;
+  back: string;
+  ease_factor: number;
+  interval_days: number;
+  next_review: string;
+  review_count: number;
+  created_at: string;
 }

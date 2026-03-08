@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
+import { JournalTemplates } from "@/components/journal/journal-templates";
 
 const MOOD_OPTIONS = [
   { value: 1, emoji: "😢", label: "Awful" },
@@ -67,6 +68,8 @@ export function JournalEditor({
   const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(entryId);
+  const [templateApplied, setTemplateApplied] = useState(!!initialContent);
+  const isNewEntry = !initialContent;
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
@@ -170,6 +173,15 @@ export function JournalEditor({
     };
   }, []);
 
+  function handleTemplateSelect(template: Record<string, unknown> | null) {
+    if (editor) {
+      if (template) {
+        editor.commands.setContent(template);
+      }
+      setTemplateApplied(true);
+    }
+  }
+
   function handleAddTag(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
@@ -187,6 +199,11 @@ export function JournalEditor({
 
   return (
     <div className="space-y-4">
+      {/* Template Picker */}
+      {isNewEntry && !templateApplied && (
+        <JournalTemplates onSelect={handleTemplateSelect} />
+      )}
+
       {/* Mood Picker */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-muted-foreground">

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SearchCommand } from "@/components/layout/search-command";
+import { QuickCapture } from "@/components/layout/quick-capture";
+import { KeyboardShortcuts } from "@/components/layout/keyboard-shortcuts";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function AppLayout({
@@ -26,6 +28,8 @@ export default async function AppLayout({
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </SidebarInset>
       <SearchCommand />
+      <QuickCapture />
+      <KeyboardShortcuts />
       <Toaster />
     </SidebarProvider>
   );

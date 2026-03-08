@@ -17,8 +17,19 @@ import {
   Lightbulb,
   Bell,
   Search,
+  Sparkles,
   Settings,
   LogOut,
+  Inbox,
+  Bookmark,
+  Layers,
+  MessageCircle,
+  Target,
+  Timer,
+  Grid3X3,
+  BarChart3,
+  Heart,
+  Trash2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -43,18 +54,41 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAppStore } from "@/stores/app-store";
 
-const navItems = [
+const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Life Dashboard", href: "/life", icon: Heart },
+  { title: "AI Chat", href: "/chat", icon: MessageCircle },
+  { title: "Inbox", href: "/inbox", icon: Inbox },
+];
+
+const workNav = [
   { title: "Notes", href: "/notes", icon: StickyNote },
   { title: "To-Dos", href: "/todos", icon: CheckSquare },
+  { title: "Matrix", href: "/matrix", icon: Grid3X3 },
   { title: "Journal", href: "/journal", icon: BookOpen },
   { title: "Calendar", href: "/calendar", icon: Calendar },
   { title: "Projects", href: "/projects", icon: FolderKanban },
-  { title: "Travel", href: "/travel", icon: Plane },
-  { title: "Connections", href: "/connections", icon: Network },
+  { title: "Focus Timer", href: "/focus", icon: Timer },
+];
+
+const learnNav = [
+  { title: "Bookmarks", href: "/bookmarks", icon: Bookmark },
+  { title: "Flashcards", href: "/flashcards", icon: Layers },
   { title: "Ideas", href: "/ideas", icon: Lightbulb },
+  { title: "Connections", href: "/connections", icon: Network },
+];
+
+const planNav = [
+  { title: "Travel", href: "/travel", icon: Plane },
+  { title: "Habits", href: "/habits", icon: Target },
   { title: "Reminders", href: "/reminders", icon: Bell },
+];
+
+const moreNav = [
+  { title: "Insights", href: "/insights", icon: BarChart3 },
+  { title: "Weekly Digest", href: "/digest", icon: Sparkles },
   { title: "Search", href: "/search", icon: Search },
+  { title: "Trash", href: "/trash", icon: Trash2 },
 ];
 
 function getUserInitials(user: User): string {
@@ -120,28 +154,36 @@ export function AppSidebar({ user }: { user: User }) {
       <SidebarSeparator />
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      tooltip={item.title}
-                      render={<Link href={item.href} />}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {[
+          { label: "Home", items: mainNav },
+          { label: "Work", items: workNav },
+          { label: "Learn & Think", items: learnNav },
+          { label: "Plan", items: planNav },
+          { label: "More", items: moreNav },
+        ].map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        tooltip={item.title}
+                        render={<Link href={item.href} />}
+                      >
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

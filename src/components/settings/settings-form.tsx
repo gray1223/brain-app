@@ -25,6 +25,7 @@ import {
   Calendar,
   CheckCircle2,
   XCircle,
+  Palette,
 } from "lucide-react";
 import type { Profile } from "@/types/database";
 import { toast } from "sonner";
@@ -39,10 +40,24 @@ export function SettingsForm({ profile, email, hasGoogleCalendar }: SettingsForm
   const router = useRouter();
   const supabase = createClient();
 
+  const ACCENT_COLORS = [
+    { name: "Blue", value: "#3b82f6" },
+    { name: "Purple", value: "#8b5cf6" },
+    { name: "Green", value: "#22c55e" },
+    { name: "Orange", value: "#f97316" },
+    { name: "Red", value: "#ef4444" },
+    { name: "Pink", value: "#ec4899" },
+    { name: "Teal", value: "#14b8a6" },
+    { name: "Yellow", value: "#eab308" },
+  ];
+
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [saving, setSaving] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(
     () => (profile?.preferences?.theme as "light" | "dark") ?? "light"
+  );
+  const [accentColor, setAccentColor] = useState<string>(
+    () => (profile?.preferences?.accentColor as string) ?? "#3b82f6"
   );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -82,6 +97,22 @@ export function SettingsForm({ profile, email, hasGoogleCalendar }: SettingsForm
 
     toast.success(`Switched to ${newTheme} mode`);
   }, [theme, profile, supabase]);
+
+  const handleAccentColorChange = useCallback(async (color: string) => {
+    setAccentColor(color);
+
+    // Apply accent color to document
+    document.documentElement.style.setProperty("--color-primary", color);
+
+    // Save to preferences
+    const prefs = { ...(profile?.preferences ?? {}), accentColor: color };
+    await supabase
+      .from("profiles")
+      .update({ preferences: prefs, updated_at: new Date().toISOString() })
+      .eq("id", profile?.id ?? "");
+
+    toast.success("Accent color updated");
+  }, [profile, supabase]);
 
   const handleLogout = useCallback(async () => {
     await supabase.auth.signOut();
@@ -155,6 +186,30 @@ export function SettingsForm({ profile, email, hasGoogleCalendar }: SettingsForm
             <Button variant="outline" size="sm" onClick={handleThemeToggle}>
               Switch to {theme === "light" ? "dark" : "light"}
             </Button>
+          </div>
+          <Separator className="my-4" />
+          <div>
+            <p className="text-sm font-medium mb-1">Accent Color</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Choose a primary accent color for the interface
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {ACCENT_COLORS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => handleAccentColorChange(c.value)}
+                  className="size-8 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  style={{
+                    backgroundColor: c.value,
+                    borderColor: accentColor === c.value ? c.value : "transparent",
+                    boxShadow: accentColor === c.value ? `0 0 0 2px ${c.value}40` : "none",
+                  }}
+                  title={c.name}
+                  aria-label={`Set accent color to ${c.name}`}
+                />
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { NoteEditor } from "@/components/notes/note-editor";
 import { NoteTagManager } from "@/components/notes/note-tag-manager";
 import { NoteConnections } from "@/components/notes/note-connections";
+import { NoteAITools } from "@/components/notes/note-ai-tools";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -69,7 +70,13 @@ export default async function NotePage({
         </div>
       </div>
 
-      <aside className="w-full shrink-0 lg:w-72">
+      <aside className="flex w-full shrink-0 flex-col gap-4 lg:w-72">
+        <NoteAITools
+          noteId={note.id}
+          title={note.title}
+          content={note.content}
+          initialTags={note.tags ?? []}
+        />
         <NoteConnections
           noteId={note.id}
           connectedNotes={connectedNotes}
