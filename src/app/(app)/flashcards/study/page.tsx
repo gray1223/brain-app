@@ -404,18 +404,26 @@ export default function StudyPage() {
 
     const updates = calculateSM2(card, quality);
 
-    const { error } = await supabase
-      .from("flashcards")
-      .update({
-        ease_factor: updates.ease_factor,
-        interval_days: updates.interval_days,
-        next_review: updates.next_review,
-        review_count: card.review_count + 1,
-      })
-      .eq("id", card.id);
+    try {
+      const res = await fetch("/api/flashcards/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardId: card.id,
+          ease_factor: updates.ease_factor,
+          interval_days: updates.interval_days,
+          next_review: updates.next_review,
+          review_count: card.review_count + 1,
+        }),
+      });
 
-    if (error) {
-      console.error("Failed to update card:", error);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Failed to update card:", err);
+        toast.error("Failed to save progress");
+      }
+    } catch (err) {
+      console.error("Network error updating card:", err);
       toast.error("Failed to save progress");
     }
 
