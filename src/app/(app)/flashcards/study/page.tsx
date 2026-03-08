@@ -20,12 +20,11 @@ import {
   Layers,
   Loader2,
   Send,
-  ArrowRight,
   Settings2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import type { Flashcard } from "@/types/database";
 
 // --- SM-2 Algorithm ---
@@ -301,6 +300,7 @@ export default function StudyPage() {
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
 
   const supabase = createClient();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const deckId = searchParams.get("deck");
 
@@ -404,7 +404,7 @@ export default function StudyPage() {
 
     const updates = calculateSM2(card, quality);
 
-    await supabase
+    const { error } = await supabase
       .from("flashcards")
       .update({
         ease_factor: updates.ease_factor,
@@ -413,6 +413,26 @@ export default function StudyPage() {
         review_count: card.review_count + 1,
       })
       .eq("id", card.id);
+
+    if (error) {
+      console.error("Failed to update card:", error);
+      toast.error("Failed to save progress");
+    }
+
+    // Update local card state so subsequent reviews chain correctly
+    setCards((prev) =>
+      prev.map((c) =>
+        c.id === card.id
+          ? {
+              ...c,
+              ease_factor: updates.ease_factor,
+              interval_days: updates.interval_days,
+              next_review: updates.next_review,
+              review_count: c.review_count + 1,
+            }
+          : c
+      )
+    );
 
     setStats((prev) => ({
       ratings: [...prev.ratings, quality],
@@ -608,7 +628,13 @@ export default function StudyPage() {
             </div>
           </Card>
 
-          <Button className="mt-6" render={<Link href={backLink} />}>
+          <Button
+            className="mt-6"
+            onClick={() => {
+              router.push(backLink);
+              router.refresh();
+            }}
+          >
             Back to {deckName || "Decks"}
           </Button>
         </div>
@@ -850,7 +876,7 @@ export default function StudyPage() {
 
               {gradeResult && (
                 <Card
-                  className={`p-4 space-y-2 ${
+                  className={`p-4 space-y-2.5 ${
                     gradeResult.score >= 2
                       ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30"
                       : gradeResult.score === 1
@@ -859,17 +885,16 @@ export default function StudyPage() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        gradeResult.score >= 2 ? "default" : "secondary"
-                      }
-                      className={
-                        gradeResult.score >= 2
-                          ? "bg-green-600"
-                          : gradeResult.score === 1
-                            ? "bg-orange-600"
-                            : "bg-red-600"
-                      }
+                    <span
+                      className="inline-flex h-5 items-center rounded-full px-2 text-xs font-semibold text-white"
+                      style={{
+                        backgroundColor:
+                          gradeResult.score >= 2
+                            ? "#16a34a"
+                            : gradeResult.score === 1
+                              ? "#ea580c"
+                              : "#dc2626",
+                      }}
                     >
                       {gradeResult.score === 3
                         ? "Correct"
@@ -878,9 +903,12 @@ export default function StudyPage() {
                           : gradeResult.score === 1
                             ? "Partially Correct"
                             : "Incorrect"}
-                    </Badge>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Score: {gradeResult.score}/3
+                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm">
                     {gradeResult.feedback}
                   </p>
                 </Card>

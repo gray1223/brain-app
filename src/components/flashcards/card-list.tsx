@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
   ChevronDown,
   ChevronUp,
   Pencil,
@@ -27,7 +20,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import type { Flashcard } from "@/types/database";
 
-type SortKey = "next_review" | "created_at" | "ease_factor";
+type SortKey = "due" | "newest" | "difficulty";
 
 function getMasteryColor(card: Flashcard) {
   if (card.interval_days === 0 || card.review_count === 0) {
@@ -49,6 +42,12 @@ function getMasteryLabel(card: Flashcard) {
   return "Learning";
 }
 
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "due", label: "Due Date" },
+  { key: "newest", label: "Newest First" },
+  { key: "difficulty", label: "Difficulty" },
+];
+
 export function CardList({
   cards: initialCards,
   deckId,
@@ -61,15 +60,15 @@ export function CardList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editFront, setEditFront] = useState("");
   const [editBack, setEditBack] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("next_review");
+  const [sortKey, setSortKey] = useState<SortKey>("due");
   const router = useRouter();
   const supabase = createClient();
 
   const sortedCards = [...cards].sort((a, b) => {
-    if (sortKey === "next_review") {
+    if (sortKey === "due") {
       return a.next_review.localeCompare(b.next_review);
     }
-    if (sortKey === "created_at") {
+    if (sortKey === "newest") {
       return b.created_at.localeCompare(a.created_at);
     }
     return b.ease_factor - a.ease_factor;
@@ -122,6 +121,31 @@ export function CardList({
     router.refresh();
   }
 
+  function formatInterval(days: number): string {
+    if (days === 0) return "New";
+    if (days === 1) return "1 day interval";
+    if (days < 30) return `${days} day interval`;
+    if (days < 365) {
+      const months = Math.round(days / 30);
+      return `${months} month${months !== 1 ? "s" : ""} interval`;
+    }
+    const years = Math.round(days / 365);
+    return `${years} year${years !== 1 ? "s" : ""} interval`;
+  }
+
+  function formatReviewCount(count: number): string {
+    if (count === 0) return "Not yet reviewed";
+    if (count === 1) return "Reviewed once";
+    return `Reviewed ${count} times`;
+  }
+
+  function formatNextReview(nextReview: string, isDue: boolean): string {
+    if (isDue) return "Due now";
+    return `Next review ${formatDistanceToNow(new Date(nextReview), {
+      addSuffix: true,
+    })}`;
+  }
+
   if (cards.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
@@ -130,24 +154,27 @@ export function CardList({
     );
   }
 
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label;
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {sortedCards.length} card{sortedCards.length !== 1 ? "s" : ""}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <ArrowUpDown className="size-3.5 text-muted-foreground" />
-          <Select value={sortKey} onValueChange={(val) => setSortKey((val as SortKey) ?? sortKey)}>
-            <SelectTrigger size="sm" className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="next_review">Due Date</SelectItem>
-              <SelectItem value="created_at">Newest First</SelectItem>
-              <SelectItem value="ease_factor">Difficulty</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="h-7 rounded-md border border-input bg-transparent px-2 text-xs text-foreground outline-none"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -231,30 +258,10 @@ export function CardList({
                 {isExpanded && (
                   <div className="mt-3 flex items-center justify-between border-t pt-3">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                      <span>
-                        Ease {card.ease_factor.toFixed(2)}
-                      </span>
-                      <span>
-                        {card.interval_days === 0
-                          ? "New"
-                          : card.interval_days === 1
-                            ? "1 day interval"
-                            : `${card.interval_days} day interval`}
-                      </span>
-                      <span>
-                        {card.review_count === 0
-                          ? "Not yet reviewed"
-                          : card.review_count === 1
-                            ? "Reviewed once"
-                            : `Reviewed ${card.review_count} times`}
-                      </span>
-                      <span>
-                        {isDue
-                          ? "Due now"
-                          : `Next review ${formatDistanceToNow(new Date(card.next_review), {
-                              addSuffix: true,
-                            })}`}
-                      </span>
+                      <span>{getMasteryLabel(card)}</span>
+                      <span>{formatInterval(card.interval_days)}</span>
+                      <span>{formatReviewCount(card.review_count)}</span>
+                      <span>{formatNextReview(card.next_review, isDue)}</span>
                     </div>
                     <div className="flex gap-1">
                       <Button
