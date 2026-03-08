@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CreateCardDialog } from "@/components/flashcards/create-card-dialog";
 import { AIGenerateDialog } from "@/components/flashcards/ai-generate-dialog";
 import { CardList } from "@/components/flashcards/card-list";
-import { ArrowLeft, GraduationCap } from "lucide-react";
+import { ArrowLeft, GraduationCap, Play } from "lucide-react";
 import Link from "next/link";
 import type { FlashcardDeck, Flashcard } from "@/types/database";
 
@@ -122,7 +122,7 @@ export default async function DeckDetailPage({
 
       {/* Action buttons */}
       <div className="flex flex-wrap items-center gap-2">
-        {dueCards.length > 0 ? (
+        {dueCards.length > 0 && (
           <Button
             size="lg"
             render={<Link href={`/flashcards/study?deck=${deck.id}`} />}
@@ -130,11 +130,20 @@ export default async function DeckDetailPage({
             <GraduationCap className="size-4" data-icon="inline-start" />
             Study Now ({dueCards.length} due)
           </Button>
-        ) : (
-          <div className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/25 px-4 py-2.5 text-sm text-muted-foreground">
-            <GraduationCap className="size-4" />
-            No cards due — all caught up!
-          </div>
+        )}
+        {cards.length > 0 && (
+          <Button
+            variant={dueCards.length > 0 ? "outline" : "default"}
+            size={dueCards.length > 0 ? "default" : "lg"}
+            render={
+              <Link
+                href={`/flashcards/study?deck=${deck.id}&mode=all`}
+              />
+            }
+          >
+            <Play className="size-4" data-icon="inline-start" />
+            Practice All Cards
+          </Button>
         )}
         <CreateCardDialog decks={[deck]} />
         <AIGenerateDialog deckId={deck.id} />

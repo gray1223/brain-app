@@ -165,8 +165,8 @@ export default async function FlashcardsPage() {
                   </div>
                 </Link>
 
-                {/* Quick study button */}
-                {dueCount > 0 && (
+                {/* Quick study / practice button */}
+                {dueCount > 0 ? (
                   <Link
                     href={`/flashcards/study?deck=${deck.id}`}
                     className="mt-3 flex items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-primary hover:text-primary-foreground"
@@ -174,7 +174,15 @@ export default async function FlashcardsPage() {
                     <Play className="size-3" />
                     Study {dueCount} due card{dueCount !== 1 ? "s" : ""}
                   </Link>
-                )}
+                ) : cardCount > 0 ? (
+                  <Link
+                    href={`/flashcards/study?deck=${deck.id}&mode=all`}
+                    className="mt-3 flex items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Play className="size-3" />
+                    Practice
+                  </Link>
+                ) : null}
               </Card>
             );
           })}

@@ -104,11 +104,13 @@ function StudyConfigScreen({
   deckName,
   onStart,
   backLink,
+  isPractice,
 }: {
   cardCount: number;
   deckName: string | null;
   onStart: (config: StudyConfig) => void;
   backLink: string;
+  isPractice: boolean;
 }) {
   const [mode, setMode] = useState<StudyMode>("flip");
   const [questionSide, setQuestionSide] = useState<QuestionSide>("front");
@@ -130,7 +132,8 @@ function StudyConfigScreen({
           <p className="text-sm text-muted-foreground">{deckName}</p>
         )}
         <p className="text-sm text-muted-foreground">
-          {cardCount} card{cardCount !== 1 ? "s" : ""} due for review
+          {cardCount} card{cardCount !== 1 ? "s" : ""}{" "}
+          {isPractice ? "available to practice" : "due for review"}
         </p>
       </div>
 
@@ -301,7 +304,9 @@ export default function StudyPage() {
   const searchParams = useSearchParams();
   const deckId = searchParams.get("deck");
 
-  const fetchDueCards = useCallback(async () => {
+  const mode = searchParams.get("mode"); // "all" = practice all cards, default = due only
+
+  const fetchCards = useCallback(async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -311,9 +316,14 @@ export default function StudyPage() {
 
     let query = supabase
       .from("flashcards")
-      .select("*")
-      .lte("next_review", today)
-      .order("next_review", { ascending: true });
+      .select("*");
+
+    // Only filter by due date if not in "practice all" mode
+    if (mode !== "all") {
+      query = query.lte("next_review", today);
+    }
+
+    query = query.order("next_review", { ascending: true });
 
     if (deckId) {
       query = query.eq("deck_id", deckId);
@@ -332,11 +342,11 @@ export default function StudyPage() {
     const { data } = await query;
     setCards((data as Flashcard[]) ?? []);
     setLoading(false);
-  }, [supabase, deckId]);
+  }, [supabase, deckId, mode]);
 
   useEffect(() => {
-    fetchDueCards();
-  }, [fetchDueCards]);
+    fetchCards();
+  }, [fetchCards]);
 
   // Get question/answer text based on config
   function getQuestion(card: Flashcard): string {
@@ -510,6 +520,7 @@ export default function StudyPage() {
         deckName={deckName}
         onStart={handleStartSession}
         backLink={backLink}
+        isPractice={mode === "all"}
       />
     );
   }
