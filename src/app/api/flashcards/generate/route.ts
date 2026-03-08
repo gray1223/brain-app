@@ -75,8 +75,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ cards });
   } catch (error) {
     console.error("AI generation error:", error);
+
+    const message =
+      error instanceof Error ? error.message : String(error);
+
+    // Surface billing/auth issues clearly
+    if (message.includes("credit balance") || message.includes("billing")) {
+      return NextResponse.json(
+        { error: "AI service unavailable — API credits need to be topped up." },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to generate flashcards" },
+      { error: "Failed to generate flashcards. Please try again." },
       { status: 500 }
     );
   }
