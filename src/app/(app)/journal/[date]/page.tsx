@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { JournalEditor } from "@/components/journal/journal-editor";
-import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -41,7 +40,10 @@ export default async function JournalDatePage({ params }: JournalDatePageProps) 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/journal" className={buttonVariants({ variant: "ghost", size: "icon" })}>
+        <Link
+          href="/journal"
+          className="inline-flex size-8 items-center justify-center rounded-lg text-sm font-medium hover:bg-muted"
+        >
           <ChevronLeft className="size-4" />
         </Link>
         <div>

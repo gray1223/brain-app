@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import { JournalCard } from "@/components/journal/journal-card";
 import { StreakCounter } from "@/components/journal/streak-counter";
 import { JournalCalendarWrapper } from "@/components/journal/journal-calendar-wrapper";
@@ -36,7 +35,10 @@ export default async function JournalPage() {
           <h1 className="text-2xl font-bold">Journal</h1>
           <StreakCounter entries={entryDates} />
         </div>
-        <Link href={`/journal/${today}`} className={buttonVariants()}>
+        <Link
+          href={`/journal/${today}`}
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 h-8 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+        >
           <Plus className="size-4" />
           Write Today&apos;s Entry
         </Link>
