@@ -32,8 +32,9 @@ export default async function JournalDatePage({ params }: JournalDatePageProps) 
   const { data: entry } = await supabase
     .from("journal_entries")
     .select("*")
+    .eq("user_id", user.id)
     .eq("date", date)
-    .single();
+    .maybeSingle();
 
   const parsedDate = parseISO(date);
 

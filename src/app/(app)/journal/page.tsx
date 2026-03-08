@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { JournalCard } from "@/components/journal/journal-card";
 import { StreakCounter } from "@/components/journal/streak-counter";
 import { JournalCalendarWrapper } from "@/components/journal/journal-calendar-wrapper";
@@ -23,6 +22,7 @@ export default async function JournalPage() {
   const { data: entries } = await supabase
     .from("journal_entries")
     .select("*")
+    .eq("user_id", user.id)
     .order("date", { ascending: false });
 
   const journalEntries = (entries ?? []) as JournalEntry[];
