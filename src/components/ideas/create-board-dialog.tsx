@@ -30,9 +30,12 @@ export function CreateBoardDialog() {
     if (!name.trim()) return;
     setLoading(true);
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data, error } = await supabase
       .from("idea_boards")
-      .insert({ name: name.trim(), description: description.trim() || null })
+      .insert({ user_id: user.id, name: name.trim(), description: description.trim() || null })
       .select()
       .single();
 

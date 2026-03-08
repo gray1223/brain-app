@@ -98,7 +98,11 @@ export function EisenhowerMatrix({ todos }: EisenhowerMatrixProps) {
     const title = quickAddInputs[quadrantKey]?.trim();
     if (!title) return;
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     await supabase.from("todos").insert({
+      user_id: user.id,
       title,
       priority,
       completed: false,

@@ -89,9 +89,13 @@ export function JournalEditor({
             })
             .eq("id", currentEntryId);
         } else {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
           const { data } = await supabase
             .from("journal_entries")
             .insert({
+              user_id: user.id,
               date,
               content,
               mood: currentMood,

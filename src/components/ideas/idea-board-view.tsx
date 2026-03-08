@@ -128,9 +128,13 @@ export function IdeaBoardView({ boardId, initialNodes }: IdeaBoardViewProps) {
 
   const addChild = useCallback(
     async (parentId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data } = await supabase
         .from("idea_nodes")
         .insert({
+          user_id: user.id,
           title: "New idea",
           parent_id: parentId,
           idea_board_id: boardId,
@@ -154,10 +158,14 @@ export function IdeaBoardView({ boardId, initialNodes }: IdeaBoardViewProps) {
 
   const addSibling = useCallback(
     async (siblingId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const sibling = nodes.find((n) => n.id === siblingId);
       const { data } = await supabase
         .from("idea_nodes")
         .insert({
+          user_id: user.id,
           title: "New idea",
           parent_id: sibling?.parent_id ?? null,
           idea_board_id: boardId,
@@ -239,9 +247,13 @@ export function IdeaBoardView({ boardId, initialNodes }: IdeaBoardViewProps) {
   );
 
   const addRootNode = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
     const { data } = await supabase
       .from("idea_nodes")
       .insert({
+        user_id: user.id,
         title: "New idea",
         parent_id: null,
         idea_board_id: boardId,
