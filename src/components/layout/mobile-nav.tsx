@@ -7,7 +7,7 @@ import {
   CheckSquare,
   StickyNote,
   Layers,
-  Menu,
+  MoreHorizontal,
 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -23,8 +23,11 @@ export function MobileNav() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden">
-      <div className="flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background md:hidden">
+      <div
+        className="grid grid-cols-5"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
         {tabs.map((tab) => {
           const isActive =
             pathname === tab.href || pathname.startsWith(tab.href + "/");
@@ -32,23 +35,26 @@ export function MobileNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 py-2 ${
                 isActive
-                  ? "text-primary font-medium"
-                  : "text-muted-foreground"
+                  ? "text-primary"
+                  : "text-muted-foreground active:text-foreground"
               }`}
             >
-              <tab.icon className={`size-5 ${isActive ? "text-primary" : ""}`} />
-              {tab.label}
+              <tab.icon className="size-5" strokeWidth={isActive ? 2.5 : 2} />
+              <span className={`text-[10px] leading-none ${isActive ? "font-semibold" : ""}`}>
+                {tab.label}
+              </span>
             </Link>
           );
         })}
         <button
+          type="button"
           onClick={toggleSidebar}
-          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] text-muted-foreground transition-colors"
+          className="flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground active:text-foreground"
         >
-          <Menu className="size-5" />
-          More
+          <MoreHorizontal className="size-5" strokeWidth={2} />
+          <span className="text-[10px] leading-none">More</span>
         </button>
       </div>
     </nav>

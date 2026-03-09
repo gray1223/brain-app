@@ -128,11 +128,7 @@
   }
   html {
     @apply font-sans;
-    /* Smooth scrolling for anchor links */
     scroll-behavior: smooth;
-    /* Respect safe areas for notch/home indicator */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right)
-      env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 }
 
@@ -144,23 +140,12 @@
   }
 }
 
-/* Mobile touch targets: minimum 44px */
+/* Tap highlight removal on mobile */
 @media (pointer: coarse) {
   button,
   a,
-  [role="button"],
-  input[type="checkbox"],
-  input[type="radio"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Exception for inline/icon buttons that use explicit small sizes */
-  [data-icon],
-  .size-6,
-  .size-5 {
-    min-height: unset;
-    min-width: unset;
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
