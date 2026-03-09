@@ -40,7 +40,7 @@ export default async function AppLayout({
     <SidebarProvider>
       <AppSidebar user={user} />
       <SidebarInset>
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
       </SidebarInset>
       <SearchCommand />
       <QuickCapture />

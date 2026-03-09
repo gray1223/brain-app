@@ -276,7 +276,7 @@ export function LifeDashboard({
     <div className="space-y-6">
       {/* Page title is subtle since the clock widget acts as the hero */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Life Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
           Everything at a glance
         </p>
@@ -572,7 +572,7 @@ export function LifeDashboard({
         </WidgetCard>
 
         {/* Reminders Widget */}
-        <WidgetCard title="Reminders" icon={Bell} href="/reminders">
+        <WidgetCard title="Reminders" icon={Bell} href="/todos?tab=reminders">
           {visibleReminders.length > 0 ? (
             <ul className="space-y-2">
               {visibleReminders.map((reminder) => (

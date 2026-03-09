@@ -5,16 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { TodoItem } from "@/components/todos/todo-item";
 import { CreateTodoDialog } from "@/components/todos/create-todo-dialog";
 import { CreateListDialog } from "@/components/todos/create-list-dialog";
+import { CreateReminderDialog } from "@/components/reminders/create-reminder-dialog";
+import { ReminderList } from "@/components/reminders/reminder-list";
 import {
   CheckSquare,
   CalendarDays,
   CalendarClock,
   CheckCircle2,
+  Bell,
 } from "lucide-react";
 import { isToday, isFuture, isPast, parseISO } from "date-fns";
-import type { Todo, TodoList } from "@/types/database";
+import type { Todo, TodoList, Reminder } from "@/types/database";
 
-export default async function TodosPage() {
+export default async function TodosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,20 +32,26 @@ export default async function TodosPage() {
     redirect("/auth/login");
   }
 
-  const [{ data: todoLists }, { data: todos }] = await Promise.all([
-    supabase
-      .from("todo_lists")
-      .select("*")
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("todos")
-      .select("*")
-      .order("order_index", { ascending: true })
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: todoLists }, { data: todos }, { data: reminders }] =
+    await Promise.all([
+      supabase
+        .from("todo_lists")
+        .select("*")
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("todos")
+        .select("*")
+        .order("order_index", { ascending: true })
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("reminders")
+        .select("*")
+        .order("remind_at", { ascending: true }),
+    ]);
 
   const allTodos = (todos as Todo[]) || [];
   const lists = (todoLists as TodoList[]) || [];
+  const allReminders = (reminders as Reminder[]) || [];
 
   const incompleteTodos = allTodos.filter((t) => !t.completed);
   const completedTodos = allTodos.filter((t) => t.completed);
@@ -47,7 +61,15 @@ export default async function TodosPage() {
   );
 
   const upcomingTodos = incompleteTodos.filter(
-    (t) => t.due_date && isFuture(parseISO(t.due_date)) && !isToday(parseISO(t.due_date))
+    (t) =>
+      t.due_date &&
+      isFuture(parseISO(t.due_date)) &&
+      !isToday(parseISO(t.due_date))
+  );
+
+  const activeReminders = allReminders.filter((r) => !r.is_dismissed);
+  const overdueReminders = activeReminders.filter((r) =>
+    isPast(parseISO(r.remind_at))
   );
 
   function groupByList(items: Todo[]) {
@@ -121,14 +143,19 @@ export default async function TodosPage() {
     );
   }
 
+  const defaultTab = tab === "reminders" ? "reminders" : "all";
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Todos</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
           <p className="text-sm text-muted-foreground">
             {incompleteTodos.length} remaining &middot;{" "}
             {completedTodos.length} completed
+            {activeReminders.length > 0 && (
+              <> &middot; {activeReminders.length} reminder{activeReminders.length !== 1 ? "s" : ""}</>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -137,7 +164,7 @@ export default async function TodosPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="all">
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="all">
             <CheckSquare className="size-3.5" />
@@ -155,6 +182,15 @@ export default async function TodosPage() {
             <CheckCircle2 className="size-3.5" />
             Completed
           </TabsTrigger>
+          <TabsTrigger value="reminders">
+            <Bell className="size-3.5" />
+            Reminders
+            {overdueReminders.length > 0 && (
+              <Badge variant="destructive" className="ml-1 px-1.5 text-[10px]">
+                {overdueReminders.length}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -171,6 +207,15 @@ export default async function TodosPage() {
 
         <TabsContent value="completed">
           {renderTodoGroup(completedTodos)}
+        </TabsContent>
+
+        <TabsContent value="reminders">
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <CreateReminderDialog />
+            </div>
+            <ReminderList reminders={allReminders} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

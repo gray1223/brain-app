@@ -15,7 +15,6 @@ import {
   Plane,
   Network,
   Lightbulb,
-  Bell,
   Search,
   Sparkles,
   Settings,
@@ -28,8 +27,9 @@ import {
   Timer,
   Grid3X3,
   BarChart3,
-  Heart,
   Trash2,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   Sidebar,
@@ -53,38 +53,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppStore } from "@/stores/app-store";
+import { useTheme } from "@/components/layout/theme-provider";
 
 const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Life Dashboard", href: "/life", icon: Heart },
-  { title: "AI Chat", href: "/chat", icon: MessageCircle },
   { title: "Inbox", href: "/inbox", icon: Inbox },
+  { title: "AI Chat", href: "/chat", icon: MessageCircle },
 ];
 
-const workNav = [
+const organizeNav = [
   { title: "Notes", href: "/notes", icon: StickyNote },
-  { title: "To-Dos", href: "/todos", icon: CheckSquare },
-  { title: "Matrix", href: "/matrix", icon: Grid3X3 },
-  { title: "Journal", href: "/journal", icon: BookOpen },
-  { title: "Calendar", href: "/calendar", icon: Calendar },
+  { title: "Tasks", href: "/todos", icon: CheckSquare },
+  { title: "Priority Matrix", href: "/matrix", icon: Grid3X3 },
   { title: "Projects", href: "/projects", icon: FolderKanban },
+  { title: "Calendar", href: "/calendar", icon: Calendar },
+];
+
+const reflectNav = [
+  { title: "Journal", href: "/journal", icon: BookOpen },
+  { title: "Habits", href: "/habits", icon: Target },
   { title: "Focus Timer", href: "/focus", icon: Timer },
 ];
 
 const learnNav = [
-  { title: "Bookmarks", href: "/bookmarks", icon: Bookmark },
   { title: "Flashcards", href: "/flashcards", icon: Layers },
+  { title: "Bookmarks", href: "/bookmarks", icon: Bookmark },
   { title: "Ideas", href: "/ideas", icon: Lightbulb },
   { title: "Connections", href: "/connections", icon: Network },
 ];
 
-const planNav = [
-  { title: "Travel", href: "/travel", icon: Plane },
-  { title: "Habits", href: "/habits", icon: Target },
-  { title: "Reminders", href: "/reminders", icon: Bell },
-];
-
 const moreNav = [
+  { title: "Travel", href: "/travel", icon: Plane },
   { title: "Insights", href: "/insights", icon: BarChart3 },
   { title: "Weekly Digest", href: "/digest", icon: Sparkles },
   { title: "Search", href: "/search", icon: Search },
@@ -124,6 +123,7 @@ export function AppSidebar({ user }: { user: User }) {
   const pathname = usePathname();
   const router = useRouter();
   const setSearchOpen = useAppStore((state) => state.setSearchOpen);
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -156,9 +156,9 @@ export function AppSidebar({ user }: { user: User }) {
       <SidebarContent>
         {[
           { label: "Home", items: mainNav },
-          { label: "Work", items: workNav },
-          { label: "Learn & Think", items: learnNav },
-          { label: "Plan", items: planNav },
+          { label: "Organize", items: organizeNav },
+          { label: "Reflect", items: reflectNav },
+          { label: "Learn", items: learnNav },
           { label: "More", items: moreNav },
         ].map((group) => (
           <SidebarGroup key={group.label}>
@@ -188,6 +188,15 @@ export function AppSidebar({ user }: { user: User }) {
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={theme === "dark" ? "Light mode" : "Dark mode"}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? <Sun /> : <Moon />}
+              <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger

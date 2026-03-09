@@ -51,6 +51,8 @@ export function ThemeProvider({
 
     if (storedTheme) {
       setThemeState(storedTheme);
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setThemeState("dark");
     }
     if (storedAccent) {
       setAccentColorState(storedAccent);
