@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { SearchCommand } from "@/components/layout/search-command";
 import { QuickCapture } from "@/components/layout/quick-capture";
 import { KeyboardShortcuts } from "@/components/layout/keyboard-shortcuts";
@@ -40,8 +41,9 @@ export default async function AppLayout({
     <SidebarProvider>
       <AppSidebar user={user} />
       <SidebarInset>
-        <main className="flex-1 overflow-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 sm:pb-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 pb-20 sm:p-6 sm:pb-6 md:pb-6">{children}</main>
       </SidebarInset>
+      <MobileNav />
       <SearchCommand />
       <QuickCapture />
       <KeyboardShortcuts />
