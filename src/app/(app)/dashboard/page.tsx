@@ -189,14 +189,17 @@ export default async function DashboardPage() {
   // Build activity map for heatmap
   const activityMap: Record<string, number> = {};
   for (const n of (heatmapNotes as { updated_at: string }[] | null) ?? []) {
+    if (!n.updated_at) continue;
     const d = format(new Date(n.updated_at), "yyyy-MM-dd");
     activityMap[d] = (activityMap[d] ?? 0) + 1;
   }
-  for (const t of (heatmapTodos as { completed_at: string }[] | null) ?? []) {
+  for (const t of (heatmapTodos as { completed_at: string | null }[] | null) ?? []) {
+    if (!t.completed_at) continue;
     const d = format(new Date(t.completed_at), "yyyy-MM-dd");
     activityMap[d] = (activityMap[d] ?? 0) + 1;
   }
   for (const j of (heatmapJournals as { date: string }[] | null) ?? []) {
+    if (!j.date) continue;
     activityMap[j.date] = (activityMap[j.date] ?? 0) + 1;
   }
 
