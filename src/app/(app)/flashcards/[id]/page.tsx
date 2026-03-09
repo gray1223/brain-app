@@ -70,39 +70,37 @@ export default async function DeckDetailPage({
         </Button>
       </div>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {deck.name}
-          </h1>
-          {deck.description && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {deck.description}
-            </p>
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+          {deck.name}
+        </h1>
+        {deck.description && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {deck.description}
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <Badge variant="secondary" className="text-[11px]">
+            {cards.length} card{cards.length !== 1 ? "s" : ""}
+          </Badge>
+          {dueCards.length > 0 && (
+            <Badge variant="default" className="text-[11px]">
+              {dueCards.length} due
+            </Badge>
           )}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">
-              {cards.length} card{cards.length !== 1 ? "s" : ""}
+          {newCards.length > 0 && (
+            <Badge variant="secondary" className="text-[11px] text-red-600 dark:text-red-400">
+              {newCards.length} new
             </Badge>
-            {dueCards.length > 0 && (
-              <Badge variant="default">
-                {dueCards.length} due
-              </Badge>
-            )}
-            {newCards.length > 0 && (
-              <Badge variant="secondary" className="text-red-600 dark:text-red-400">
-                {newCards.length} new
-              </Badge>
-            )}
-            {learningCards.length > 0 && (
-              <Badge variant="secondary" className="text-yellow-600 dark:text-yellow-400">
-                {learningCards.length} learning
-              </Badge>
-            )}
-            <Badge variant="secondary" className="text-green-600 dark:text-green-400">
-              {masteryPercent}% mastered
+          )}
+          {learningCards.length > 0 && (
+            <Badge variant="secondary" className="text-[11px] text-yellow-600 dark:text-yellow-400">
+              {learningCards.length} learning
             </Badge>
-          </div>
+          )}
+          <Badge variant="secondary" className="text-[11px] text-green-600 dark:text-green-400">
+            {masteryPercent}% mastered
+          </Badge>
         </div>
       </div>
 
@@ -121,20 +119,22 @@ export default async function DeckDetailPage({
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
         {dueCards.length > 0 && (
           <Button
+            className="col-span-2"
             size="lg"
             render={<Link href={`/flashcards/study?deck=${deck.id}`} />}
           >
             <GraduationCap className="size-4" data-icon="inline-start" />
-            Study Now ({dueCards.length} due)
+            Study {dueCards.length} Due
           </Button>
         )}
         {cards.length > 0 && (
           <Button
             variant={dueCards.length > 0 ? "outline" : "default"}
             size={dueCards.length > 0 ? "default" : "lg"}
+            className={dueCards.length > 0 ? "" : "col-span-2"}
             render={
               <Link
                 href={`/flashcards/study?deck=${deck.id}&mode=all`}
@@ -142,7 +142,7 @@ export default async function DeckDetailPage({
             }
           >
             <Play className="size-4" data-icon="inline-start" />
-            Practice All Cards
+            Practice All
           </Button>
         )}
         <CreateCardDialog decks={[deck]} />

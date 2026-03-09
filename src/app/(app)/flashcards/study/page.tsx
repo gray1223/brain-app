@@ -468,6 +468,70 @@ export default function StudyPage() {
     }
   }
 
+  // Save mastery without advancing to next card (for type mode auto-save)
+  async function saveMastery(quality: number) {
+    const card = cards[currentIndex];
+    if (!card) return;
+
+    const updates = calculateSM2(card, quality);
+
+    try {
+      const res = await fetch("/api/flashcards/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardId: card.id,
+          ease_factor: updates.ease_factor,
+          interval_days: updates.interval_days,
+          next_review: updates.next_review,
+          review_count: card.review_count + 1,
+        }),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to save mastery");
+      }
+    } catch (err) {
+      console.error("Network error saving mastery:", err);
+    }
+
+    // Update local card state
+    setCards((prev) =>
+      prev.map((c) =>
+        c.id === card.id
+          ? {
+              ...c,
+              ease_factor: updates.ease_factor,
+              interval_days: updates.interval_days,
+              next_review: updates.next_review,
+              review_count: c.review_count + 1,
+            }
+          : c
+      )
+    );
+
+    setStats((prev) => ({
+      ratings: [...prev.ratings, quality],
+      easeFactors: [...prev.easeFactors, updates.ease_factor],
+    }));
+  }
+
+  // Advance to next card (used by "Next" button in type mode)
+  function advanceCard() {
+    const newReviewedCount = reviewedCount + 1;
+    setReviewedCount(newReviewedCount);
+    setFlipped(false);
+    setTypedAnswer("");
+    setGradeResult(null);
+
+    if (currentIndex + 1 >= cards.length) {
+      setDone(true);
+      toast.success("Review session complete!");
+    } else {
+      setCurrentIndex(currentIndex + 1);
+    }
+  }
+
   async function handleGradeAnswer() {
     const card = cards[currentIndex];
     if (!card || !typedAnswer.trim()) return;
@@ -489,6 +553,9 @@ export default function StudyPage() {
       const result = (await res.json()) as GradeResult;
       setGradeResult(result);
       setFlipped(true);
+
+      // Auto-save mastery based on AI score
+      await saveMastery(result.score);
     } catch {
       toast.error("Failed to grade answer. Please rate manually.");
       setFlipped(true);
@@ -716,19 +783,19 @@ export default function StudyPage() {
             >
               {/* Front */}
               <Card
-                className="flex min-h-[280px] items-center justify-center p-8 text-center"
+                className="flex min-h-[200px] items-center justify-center p-6 text-center sm:min-h-[280px] sm:p-8"
                 style={{ backfaceVisibility: "hidden" }}
               >
-                <div className="space-y-4 max-w-md">
+                <div className="space-y-3 max-w-md">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     {getQuestionLabel()}
                   </p>
-                  <p className="text-lg font-medium leading-relaxed whitespace-pre-wrap">
+                  <p className="text-base font-medium leading-relaxed whitespace-pre-wrap sm:text-lg">
                     {getQuestion(currentCard)}
                   </p>
                   {!flipped && (
-                    <p className="text-xs text-muted-foreground/60 pt-2">
-                      Click or press Space to reveal
+                    <p className="text-xs text-muted-foreground/60 pt-1">
+                      Tap to reveal
                     </p>
                   )}
                 </div>
@@ -736,17 +803,17 @@ export default function StudyPage() {
 
               {/* Back */}
               <Card
-                className="absolute inset-0 flex min-h-[280px] items-center justify-center p-8 text-center"
+                className="absolute inset-0 flex min-h-[200px] items-center justify-center p-6 text-center sm:min-h-[280px] sm:p-8"
                 style={{
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
                 }}
               >
-                <div className="space-y-4 max-w-md">
+                <div className="space-y-3 max-w-md">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                     {getAnswerLabel()}
                   </p>
-                  <p className="text-lg font-medium leading-relaxed whitespace-pre-wrap">
+                  <p className="text-base font-medium leading-relaxed whitespace-pre-wrap sm:text-lg">
                     {getAnswer(currentCard)}
                   </p>
                 </div>
@@ -805,12 +872,12 @@ export default function StudyPage() {
       ) : (
         <>
           {/* Type Answer Mode */}
-          <Card className="flex min-h-[200px] items-center justify-center p-8 text-center">
-            <div className="space-y-4 max-w-md">
+          <Card className="flex min-h-[160px] items-center justify-center p-5 text-center sm:min-h-[200px] sm:p-8">
+            <div className="space-y-3 max-w-md">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 {getQuestionLabel()}
               </p>
-              <p className="text-lg font-medium leading-relaxed whitespace-pre-wrap">
+              <p className="text-base font-medium leading-relaxed whitespace-pre-wrap sm:text-lg">
                 {getQuestion(currentCard)}
               </p>
             </div>
@@ -929,57 +996,45 @@ export default function StudyPage() {
                 </Card>
               )}
 
-              {/* Rate buttons */}
-              <div className="space-y-2">
-                <p className="text-center text-xs font-medium text-muted-foreground">
-                  {gradeResult
-                    ? "Confirm your rating or adjust:"
-                    : "How well did you know this?"}
-                </p>
-                <div className="grid grid-cols-4 gap-3">
-                  <button
-                    className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border px-3 py-4 shadow-sm transition-colors ${
-                      gradeResult?.score === 0
-                        ? "border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-400"
-                        : "border-input bg-background text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
-                    }`}
-                    onClick={() => handleRate(0)}
-                  >
-                    <RotateCcw className="size-4" />
-                    <span className="text-xs font-medium">Again</span>
-                  </button>
-                  <button
-                    className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border px-3 py-4 shadow-sm transition-colors ${
-                      gradeResult?.score === 1
-                        ? "border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-400"
-                        : "border-input bg-background text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-950"
-                    }`}
-                    onClick={() => handleRate(1)}
-                  >
-                    <span className="text-sm font-medium">Hard</span>
-                  </button>
-                  <button
-                    className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border px-3 py-4 shadow-sm transition-colors ${
-                      gradeResult?.score === 2
-                        ? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-400"
-                        : "border-input bg-background text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
-                    }`}
-                    onClick={() => handleRate(2)}
-                  >
-                    <span className="text-sm font-medium">Good</span>
-                  </button>
-                  <button
-                    className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border px-3 py-4 shadow-sm transition-colors ${
-                      gradeResult?.score === 3
-                        ? "border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-950 dark:text-green-400"
-                        : "border-input bg-background text-green-600 hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-950"
-                    }`}
-                    onClick={() => handleRate(3)}
-                  >
-                    <span className="text-sm font-medium">Easy</span>
-                  </button>
+              {/* Next button (mastery already saved by AI grade) */}
+              {gradeResult ? (
+                <Button className="w-full" size="lg" onClick={advanceCard}>
+                  {currentIndex + 1 >= cards.length ? "Finish Session" : "Next Card"}
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-center text-xs font-medium text-muted-foreground">
+                    How well did you know this?
+                  </p>
+                  <div className="grid grid-cols-4 gap-3">
+                    <button
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-4 text-red-600 shadow-sm transition-colors hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950"
+                      onClick={() => handleRate(0)}
+                    >
+                      <RotateCcw className="size-4" />
+                      <span className="text-xs font-medium">Again</span>
+                    </button>
+                    <button
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-4 text-orange-600 shadow-sm transition-colors hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-950"
+                      onClick={() => handleRate(1)}
+                    >
+                      <span className="text-sm font-medium">Hard</span>
+                    </button>
+                    <button
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-4 text-blue-600 shadow-sm transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+                      onClick={() => handleRate(2)}
+                    >
+                      <span className="text-sm font-medium">Good</span>
+                    </button>
+                    <button
+                      className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 py-4 text-green-600 shadow-sm transition-colors hover:bg-green-50 hover:text-green-700 dark:text-green-400 dark:hover:bg-green-950"
+                      onClick={() => handleRate(3)}
+                    >
+                      <span className="text-sm font-medium">Easy</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </>
