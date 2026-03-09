@@ -4,7 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SearchCommand } from "@/components/layout/search-command";
-import { QuickCapture } from "@/components/layout/quick-capture";
+import { QuickAddFab } from "@/components/layout/quick-add-fab";
 import { KeyboardShortcuts } from "@/components/layout/keyboard-shortcuts";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -45,7 +45,7 @@ export default async function AppLayout({
       </SidebarInset>
       <MobileNav />
       <SearchCommand />
-      <QuickCapture />
+      <QuickAddFab />
       <KeyboardShortcuts />
       <Toaster />
     </SidebarProvider>

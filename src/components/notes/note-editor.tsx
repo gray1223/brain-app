@@ -5,6 +5,12 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
+import Highlight from "@tiptap/extension-highlight";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Typography from "@tiptap/extension-typography";
+import { common, createLowlight } from "lowlight";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +22,16 @@ import {
   ListOrdered,
   Link as LinkIcon,
   Unlink,
+  Code,
+  Highlighter,
+  ListChecks,
+  Minus,
+  Quote,
+  Strikethrough,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const lowlight = createLowlight(common);
 
 interface NoteEditorProps {
   noteId: string;
@@ -59,7 +73,9 @@ export function NoteEditor({ noteId, initialContent, initialTitle }: NoteEditorP
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false, // replaced by CodeBlockLowlight
+      }),
       Placeholder.configure({
         placeholder: "Start writing...",
       }),
@@ -69,6 +85,11 @@ export function NoteEditor({ noteId, initialContent, initialTitle }: NoteEditorP
           class: "text-primary underline underline-offset-2 cursor-pointer",
         },
       }),
+      Highlight.configure({ multicolor: false }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      CodeBlockLowlight.configure({ lowlight }),
+      Typography,
     ],
     content: initialContent ?? undefined,
     onUpdate: ({ editor }) => {
@@ -134,6 +155,23 @@ export function NoteEditor({ noteId, initialContent, initialTitle }: NoteEditorP
           <Italic />
         </ToolbarButton>
         <ToolbarButton
+          active={editor.isActive("strike")}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          label="Strikethrough"
+        >
+          <Strikethrough />
+        </ToolbarButton>
+        <ToolbarButton
+          active={editor.isActive("highlight")}
+          onClick={() => editor.chain().focus().toggleHighlight().run()}
+          label="Highlight"
+        >
+          <Highlighter />
+        </ToolbarButton>
+
+        <div className="mx-0.5 h-5 w-px bg-border" />
+
+        <ToolbarButton
           active={editor.isActive("heading", { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           label="Heading"
@@ -154,6 +192,40 @@ export function NoteEditor({ noteId, initialContent, initialTitle }: NoteEditorP
         >
           <ListOrdered />
         </ToolbarButton>
+        <ToolbarButton
+          active={editor.isActive("taskList")}
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+          label="Task List"
+        >
+          <ListChecks />
+        </ToolbarButton>
+
+        <div className="mx-0.5 h-5 w-px bg-border" />
+
+        <ToolbarButton
+          active={editor.isActive("codeBlock")}
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          label="Code Block"
+        >
+          <Code />
+        </ToolbarButton>
+        <ToolbarButton
+          active={editor.isActive("blockquote")}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          label="Quote"
+        >
+          <Quote />
+        </ToolbarButton>
+        <ToolbarButton
+          active={false}
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          label="Divider"
+        >
+          <Minus />
+        </ToolbarButton>
+
+        <div className="mx-0.5 h-5 w-px bg-border" />
+
         {editor.isActive("link") ? (
           <ToolbarButton
             active

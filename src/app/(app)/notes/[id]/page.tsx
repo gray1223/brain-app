@@ -4,6 +4,7 @@ import { NoteEditor } from "@/components/notes/note-editor";
 import { NoteTagManager } from "@/components/notes/note-tag-manager";
 import { NoteConnections } from "@/components/notes/note-connections";
 import { NoteAITools } from "@/components/notes/note-ai-tools";
+import { GenerateFlashcardsButton } from "@/components/notes/generate-flashcards-button";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -65,8 +66,13 @@ export default async function NotePage({
           initialTitle={note.title}
         />
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <NoteTagManager noteId={note.id} initialTags={note.tags ?? []} />
+          <GenerateFlashcardsButton
+            noteId={note.id}
+            noteTitle={note.title}
+            noteContent={note.content as Record<string, unknown> | null}
+          />
         </div>
       </div>
 

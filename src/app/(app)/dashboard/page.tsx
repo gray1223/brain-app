@@ -8,6 +8,7 @@ import {
   startOfMonth,
 } from "date-fns";
 import { LifeDashboard } from "@/components/life/life-dashboard";
+import { StreakHeatmapWidget } from "@/components/dashboard/streak-heatmap-widget";
 import type {
   Profile,
   Todo,
@@ -57,6 +58,9 @@ export default async function DashboardPage() {
     completedTodosWeekResult,
     journalEntriesMonthResult,
     activeProjectsResult,
+    { data: heatmapNotes },
+    { data: heatmapTodos },
+    { data: heatmapJournals },
   ] = await Promise.all([
     supabase
       .from("profiles")
@@ -140,6 +144,23 @@ export default async function DashboardPage() {
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .eq("status", "active"),
+    // Activity data for heatmap (notes updated, todos completed, journal entries - last 91 days)
+    supabase
+      .from("notes")
+      .select("updated_at")
+      .eq("user_id", user.id)
+      .gte("updated_at", format(subDays(now, 91), "yyyy-MM-dd")),
+    supabase
+      .from("todos")
+      .select("completed_at")
+      .eq("user_id", user.id)
+      .eq("completed", true)
+      .gte("completed_at", format(subDays(now, 91), "yyyy-MM-dd")),
+    supabase
+      .from("journal_entries")
+      .select("date")
+      .eq("user_id", user.id)
+      .gte("date", format(subDays(now, 91), "yyyy-MM-dd")),
   ]);
 
   const sortedTodos = ((todos as Todo[] | null) ?? [])
@@ -165,24 +186,43 @@ export default async function DashboardPage() {
     }
   }
 
+  // Build activity map for heatmap
+  const activityMap: Record<string, number> = {};
+  for (const n of (heatmapNotes as { updated_at: string }[] | null) ?? []) {
+    const d = format(new Date(n.updated_at), "yyyy-MM-dd");
+    activityMap[d] = (activityMap[d] ?? 0) + 1;
+  }
+  for (const t of (heatmapTodos as { completed_at: string }[] | null) ?? []) {
+    const d = format(new Date(t.completed_at), "yyyy-MM-dd");
+    activityMap[d] = (activityMap[d] ?? 0) + 1;
+  }
+  for (const j of (heatmapJournals as { date: string }[] | null) ?? []) {
+    activityMap[j.date] = (activityMap[j.date] ?? 0) + 1;
+  }
+
   return (
-    <LifeDashboard
-      profile={(profile as Profile) ?? null}
-      recentNotes={(notes as Note[] | null) ?? []}
-      incompleteTodos={sortedTodos}
-      todayJournal={(journalEntry as JournalEntry | null) ?? null}
-      upcomingEvents={(events as CalendarEvent[] | null) ?? []}
-      habits={(habits as Habit[] | null) ?? []}
-      habitCompletions={(habitCompletions as HabitCompletion[] | null) ?? []}
-      activeReminders={(reminders as Reminder[] | null) ?? []}
-      currentStreak={currentStreak}
-      unprocessedCaptureCount={capturesResult.count ?? 0}
-      quickStats={{
-        totalNotes: totalNotesResult.count ?? 0,
-        completedTodosThisWeek: completedTodosWeekResult.count ?? 0,
-        journalEntriesThisMonth: journalEntriesMonthResult.count ?? 0,
-        activeProjectsCount: activeProjectsResult.count ?? 0,
-      }}
-    />
+    <>
+      <LifeDashboard
+        profile={(profile as Profile) ?? null}
+        recentNotes={(notes as Note[] | null) ?? []}
+        incompleteTodos={sortedTodos}
+        todayJournal={(journalEntry as JournalEntry | null) ?? null}
+        upcomingEvents={(events as CalendarEvent[] | null) ?? []}
+        habits={(habits as Habit[] | null) ?? []}
+        habitCompletions={(habitCompletions as HabitCompletion[] | null) ?? []}
+        activeReminders={(reminders as Reminder[] | null) ?? []}
+        currentStreak={currentStreak}
+        unprocessedCaptureCount={capturesResult.count ?? 0}
+        quickStats={{
+          totalNotes: totalNotesResult.count ?? 0,
+          completedTodosThisWeek: completedTodosWeekResult.count ?? 0,
+          journalEntriesThisMonth: journalEntriesMonthResult.count ?? 0,
+          activeProjectsCount: activeProjectsResult.count ?? 0,
+        }}
+        streakHeatmap={
+          <StreakHeatmapWidget activityMap={activityMap} currentStreak={currentStreak} />
+        }
+      />
+    </>
   );
 }

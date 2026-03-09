@@ -9,6 +9,7 @@ import { CardList } from "@/components/flashcards/card-list";
 import { ArrowLeft, GraduationCap, Play } from "lucide-react";
 import Link from "next/link";
 import type { FlashcardDeck, Flashcard } from "@/types/database";
+import { ShareDialog } from "./share-dialog";
 
 export default async function DeckDetailPage({
   params,
@@ -147,6 +148,7 @@ export default async function DeckDetailPage({
         )}
         <CreateCardDialog decks={[deck]} />
         <AIGenerateDialog deckId={deck.id} />
+        <ShareDialog deckId={deck.id} deckName={deck.name} />
       </div>
 
       {/* Tabs for card views */}

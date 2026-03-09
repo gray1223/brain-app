@@ -55,6 +55,7 @@ interface LifeDashboardProps {
     journalEntriesThisMonth: number;
     activeProjectsCount: number;
   };
+  streakHeatmap?: React.ReactNode;
 }
 
 // --- Quotes ---
@@ -121,6 +122,7 @@ export function LifeDashboard({
   currentStreak,
   unprocessedCaptureCount,
   quickStats,
+  streakHeatmap,
 }: LifeDashboardProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -570,6 +572,13 @@ export function LifeDashboard({
             </div>
           </div>
         </WidgetCard>
+
+        {/* Activity Heatmap Widget */}
+        {streakHeatmap && (
+          <div className="md:col-span-2 lg:col-span-2">
+            {streakHeatmap}
+          </div>
+        )}
 
         {/* Reminders Widget */}
         <WidgetCard title="Reminders" icon={Bell} href="/todos?tab=reminders">

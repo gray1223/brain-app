@@ -7,10 +7,8 @@ import { CreateDeckDialog } from "@/components/flashcards/create-deck-dialog";
 import {
   Layers,
   GraduationCap,
-  TrendingUp,
-  Calendar,
-  BookOpen,
   Play,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import type { FlashcardDeck, Flashcard } from "@/types/database";
@@ -72,25 +70,28 @@ export default async function FlashcardsPage() {
             Spaced repetition for effective learning
           </p>
         </div>
-        <CreateDeckDialog />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" render={<Link href="/flashcards/import" />}>
+            <Upload className="size-4" data-icon="inline-start" />
+            Import
+          </Button>
+          <CreateDeckDialog />
+        </div>
       </div>
 
       {/* Stats overview */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3 text-center">
-          <BookOpen className="mx-auto mb-1 size-5 text-muted-foreground" />
+      <div className="flex gap-3">
+        <Card className="flex-1 p-3 text-center">
           <p className="text-lg font-semibold">{cards.length}</p>
-          <p className="text-xs text-muted-foreground">Total Cards</p>
+          <p className="text-[11px] text-muted-foreground">Cards</p>
         </Card>
-        <Card className="p-3 text-center">
-          <Calendar className="mx-auto mb-1 size-5 text-muted-foreground" />
+        <Card className="flex-1 p-3 text-center">
           <p className="text-lg font-semibold">{totalDue}</p>
-          <p className="text-xs text-muted-foreground">Due Today</p>
+          <p className="text-[11px] text-muted-foreground">Due</p>
         </Card>
-        <Card className="p-3 text-center">
-          <TrendingUp className="mx-auto mb-1 size-5 text-muted-foreground" />
+        <Card className="flex-1 p-3 text-center">
           <p className="text-lg font-semibold">{totalMastered}</p>
-          <p className="text-xs text-muted-foreground">Mastered</p>
+          <p className="text-[11px] text-muted-foreground">Mastered</p>
         </Card>
       </div>
 

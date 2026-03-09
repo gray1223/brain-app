@@ -35,14 +35,14 @@ export function MobileNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center justify-center gap-1 py-2 ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-2.5 ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground active:text-foreground"
               }`}
             >
               <tab.icon className="size-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] leading-none ${isActive ? "font-semibold" : ""}`}>
+              <span className={`text-[11px] leading-none ${isActive ? "font-semibold" : ""}`}>
                 {tab.label}
               </span>
             </Link>
@@ -51,10 +51,10 @@ export function MobileNav() {
         <button
           type="button"
           onClick={toggleSidebar}
-          className="flex flex-col items-center justify-center gap-1 py-2 text-muted-foreground active:text-foreground"
+          className="flex flex-col items-center justify-center gap-0.5 py-2.5 text-muted-foreground active:text-foreground"
         >
           <MoreHorizontal className="size-5" strokeWidth={2} />
-          <span className="text-[10px] leading-none">More</span>
+          <span className="text-[11px] leading-none">More</span>
         </button>
       </div>
     </nav>

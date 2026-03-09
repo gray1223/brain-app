@@ -159,6 +159,52 @@
   }
 }
 
+/* TipTap task list checkboxes */
+.prose ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.prose ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.prose ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+
+/* TipTap code block with syntax highlighting */
+.prose pre {
+  background: oklch(0.2 0 0);
+  color: oklch(0.9 0 0);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-geist-mono);
+}
+
+.dark .prose pre {
+  background: oklch(0.15 0 0);
+}
+
+/* TipTap highlight */
+.prose mark {
+  background-color: oklch(0.9 0.1 90);
+  border-radius: 0.125rem;
+  padding: 0.1em 0.2em;
+}
+
+.dark .prose mark {
+  background-color: oklch(0.4 0.1 90);
+}
+
 /* Ensure no horizontal overflow on mobile */
 @media (max-width: 640px) {
   html,

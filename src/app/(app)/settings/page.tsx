@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SettingsForm } from "@/components/settings/settings-form";
+import { NotificationSettings } from "@/components/settings/notification-settings";
 import { Settings } from "lucide-react";
 
 export default async function SettingsPage() {
@@ -37,6 +38,11 @@ export default async function SettingsPage() {
         email={user.email ?? ""}
         hasGoogleCalendar={!!user.app_metadata?.providers?.includes("google")}
       />
+
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold">Notifications</h2>
+        <NotificationSettings />
+      </div>
     </div>
   );
 }
