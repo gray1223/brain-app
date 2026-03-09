@@ -122,8 +122,62 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent overscroll bounce on iOS PWA */
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
   }
   html {
     @apply font-sans;
+    /* Smooth scrolling for anchor links */
+    scroll-behavior: smooth;
+    /* Respect safe areas for notch/home indicator */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+}
+
+/* PWA standalone mode: account for status bar */
+@media (display-mode: standalone) {
+  body {
+    /* Prevent pull-to-refresh in PWA */
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Mobile touch targets: minimum 44px */
+@media (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Exception for inline/icon buttons that use explicit small sizes */
+  [data-icon],
+  .size-6,
+  .size-5 {
+    min-height: unset;
+    min-width: unset;
+  }
+}
+
+/* Prevent text selection on interactive elements in PWA */
+@media (display-mode: standalone) {
+  button,
+  a,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Ensure no horizontal overflow on mobile */
+@media (max-width: 640px) {
+  html,
+  body {
+    overflow-x: hidden;
   }
 }
