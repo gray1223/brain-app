@@ -17,13 +17,24 @@ export default async function CalendarPage() {
   const startOfMonth = new Date(year, month, 1).toISOString();
   const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
 
-  const { data: events } = await supabase
-    .from("calendar_events")
-    .select("*")
-    .eq("user_id", user!.id)
-    .gte("start_time", startOfMonth)
-    .lte("start_time", endOfMonth)
-    .order("start_time", { ascending: true });
+  const [eventsResult, todosResult] = await Promise.all([
+    supabase
+      .from("calendar_events")
+      .select("*")
+      .eq("user_id", user!.id)
+      .gte("start_time", startOfMonth)
+      .lte("start_time", endOfMonth)
+      .order("start_time", { ascending: true }),
+    supabase
+      .from("todos")
+      .select("*")
+      .eq("user_id", user!.id)
+      .not("due_date", "is", null)
+      .gte("due_date", startOfMonth.split("T")[0])
+      .lte("due_date", endOfMonth.split("T")[0])
+      .is("deleted_at", null)
+      .order("due_date", { ascending: true }),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,7 +50,8 @@ export default async function CalendarPage() {
       </div>
 
       <CalendarView
-        initialEvents={events ?? []}
+        initialEvents={eventsResult.data ?? []}
+        initialTodos={todosResult.data ?? []}
         initialMonth={month}
         initialYear={year}
       />

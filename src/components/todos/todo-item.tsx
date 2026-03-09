@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, Trash2, Calendar } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Calendar, FolderKanban } from "lucide-react";
 import { format, isPast, isToday, parseISO } from "date-fns";
-import type { Todo } from "@/types/database";
+import type { Todo, Project } from "@/types/database";
+import Link from "next/link";
 
 const priorityConfig = {
   urgent: { label: "Urgent", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
@@ -17,7 +18,12 @@ const priorityConfig = {
   low: { label: "Low", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
 } as const;
 
-export function TodoItem({ todo }: { todo: Todo }) {
+interface TodoItemProps {
+  todo: Todo;
+  project?: Project | null;
+}
+
+export function TodoItem({ todo, project }: TodoItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -103,6 +109,17 @@ export function TodoItem({ todo }: { todo: Todo }) {
                 {format(dueDate, "MMM d")}
                 {isOverdue && " (overdue)"}
               </span>
+            )}
+
+            {project && (
+              <Link
+                href={`/projects/${project.id}`}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary hover:bg-primary/20 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FolderKanban className="size-2.5" />
+                {project.name}
+              </Link>
             )}
           </div>
 

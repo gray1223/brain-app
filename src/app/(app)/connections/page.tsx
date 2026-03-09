@@ -3,10 +3,24 @@ import { ConnectionGraph } from "@/components/connections/connection-graph";
 import type { GraphNodeInput } from "@/components/connections/connection-graph";
 import { Network } from "lucide-react";
 
+function extractTextFromContent(
+  content: Record<string, unknown> | null
+): string {
+  if (!content) return "";
+  // Try to extract text from common editor formats (TipTap/ProseMirror JSON)
+  try {
+    const str = JSON.stringify(content);
+    // Remove JSON syntax to get raw text
+    const text = str.replace(/[{}\[\]"]/g, " ").replace(/\s+/g, " ").trim();
+    return text.slice(0, 200);
+  } catch {
+    return "";
+  }
+}
+
 export default async function ConnectionsPage() {
   const supabase = await createClient();
 
-  // Fetch notes, ideas, and flashcard decks in parallel
   const [
     { data: notes },
     { data: connections },
@@ -15,7 +29,7 @@ export default async function ConnectionsPage() {
   ] = await Promise.all([
     supabase
       .from("notes")
-      .select("id, title, tags")
+      .select("id, title, tags, content")
       .eq("is_archived", false)
       .order("created_at", { ascending: false }),
     supabase
@@ -23,7 +37,7 @@ export default async function ConnectionsPage() {
       .select("id, note_a_id, note_b_id, label"),
     supabase
       .from("idea_nodes")
-      .select("id, title")
+      .select("id, title, content")
       .order("created_at", { ascending: false }),
     supabase
       .from("flashcard_decks")
@@ -36,18 +50,23 @@ export default async function ConnectionsPage() {
     title: n.title,
     type: "note" as const,
     tags: n.tags ?? [],
+    contentSnippet: extractTextFromContent(
+      n.content as Record<string, unknown> | null
+    ),
   }));
 
   const ideaNodes: GraphNodeInput[] = (ideas ?? []).map((n) => ({
     id: n.id,
     title: n.title,
     type: "idea" as const,
+    contentSnippet: typeof n.content === "string" ? n.content.slice(0, 200) : "",
   }));
 
   const deckNodes: GraphNodeInput[] = (flashcardDecks ?? []).map((d) => ({
     id: d.id,
     title: d.name,
     type: "flashcard_deck" as const,
+    contentSnippet: d.description ?? "",
   }));
 
   const nodeList = [...noteNodes, ...ideaNodes, ...deckNodes];

@@ -37,6 +37,11 @@ export default async function IdeaBoardPage({ params }: IdeaBoardPageProps) {
     .eq("idea_board_id", id)
     .order("created_at", { ascending: true });
 
+  const { data: connections } = await supabase
+    .from("idea_node_connections")
+    .select("*")
+    .eq("idea_board_id", id);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
@@ -59,7 +64,11 @@ export default async function IdeaBoardPage({ params }: IdeaBoardPageProps) {
         </div>
       </div>
 
-      <IdeaBoardView boardId={id} initialNodes={nodes ?? []} />
+      <IdeaBoardView
+        boardId={id}
+        initialNodes={nodes ?? []}
+        initialConnections={connections ?? []}
+      />
     </div>
   );
 }

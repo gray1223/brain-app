@@ -15,7 +15,7 @@ import {
   Bell,
 } from "lucide-react";
 import { isToday, isFuture, isPast, parseISO } from "date-fns";
-import type { Todo, TodoList, Reminder } from "@/types/database";
+import type { Todo, TodoList, Reminder, Project } from "@/types/database";
 
 export default async function TodosPage({
   searchParams,
@@ -32,7 +32,7 @@ export default async function TodosPage({
     redirect("/auth/login");
   }
 
-  const [{ data: todoLists }, { data: todos }, { data: reminders }] =
+  const [{ data: todoLists }, { data: todos }, { data: reminders }, { data: projects }] =
     await Promise.all([
       supabase
         .from("todo_lists")
@@ -47,11 +47,18 @@ export default async function TodosPage({
         .from("reminders")
         .select("*")
         .order("remind_at", { ascending: true }),
+      supabase
+        .from("projects")
+        .select("*")
+        .eq("user_id", user.id)
+        .in("status", ["planning", "active"])
+        .order("name", { ascending: true }),
     ]);
 
   const allTodos = (todos as Todo[]) || [];
   const lists = (todoLists as TodoList[]) || [];
   const allReminders = (reminders as Reminder[]) || [];
+  const activeProjects = (projects as Project[]) || [];
 
   const incompleteTodos = allTodos.filter((t) => !t.completed);
   const completedTodos = allTodos.filter((t) => t.completed);
@@ -119,7 +126,7 @@ export default async function TodosPage({
             </div>
             <div className="space-y-1">
               {groupTodos.map((todo) => (
-                <TodoItem key={todo.id} todo={todo} />
+                <TodoItem key={todo.id} todo={todo} project={todo.project_id ? activeProjects.find((p) => p.id === todo.project_id) : null} />
               ))}
             </div>
           </div>
@@ -134,7 +141,7 @@ export default async function TodosPage({
             </div>
             <div className="space-y-1">
               {unassigned.map((todo) => (
-                <TodoItem key={todo.id} todo={todo} />
+                <TodoItem key={todo.id} todo={todo} project={todo.project_id ? activeProjects.find((p) => p.id === todo.project_id) : null} />
               ))}
             </div>
           </div>
@@ -160,7 +167,7 @@ export default async function TodosPage({
         </div>
         <div className="flex items-center gap-2">
           <CreateListDialog />
-          <CreateTodoDialog lists={lists} />
+          <CreateTodoDialog lists={lists} projects={activeProjects} />
         </div>
       </div>
 

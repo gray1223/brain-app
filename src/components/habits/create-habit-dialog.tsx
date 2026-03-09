@@ -69,6 +69,19 @@ export function CreateHabitDialog() {
     } = await supabase.auth.getUser();
     if (!user) return;
 
+    // Get max order_index to place new habit at end
+    const { data: maxOrderResult } = await supabase
+      .from("habits")
+      .select("order_index")
+      .eq("user_id", user.id)
+      .order("order_index", { ascending: false })
+      .limit(1);
+
+    const nextOrder =
+      maxOrderResult && maxOrderResult.length > 0
+        ? (maxOrderResult[0].order_index ?? 0) + 1
+        : 0;
+
     await supabase.from("habits").insert({
       user_id: user.id,
       name: name.trim(),
@@ -76,6 +89,7 @@ export function CreateHabitDialog() {
       frequency,
       target_count: parseInt(targetCount) || 1,
       color,
+      order_index: nextOrder,
     });
 
     setSaving(false);

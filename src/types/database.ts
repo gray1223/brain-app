@@ -43,6 +43,7 @@ export interface Todo {
   id: string;
   user_id: string;
   list_id: string | null;
+  project_id: string | null;
   title: string;
   description: string | null;
   priority: "low" | "medium" | "high" | "urgent";
@@ -155,17 +156,36 @@ export interface PackingItem {
   category: string;
 }
 
+export type IdeaCategory = "thought" | "question" | "evidence" | "action";
+
 export interface IdeaNode {
   id: string;
   user_id: string;
   title: string;
   content: string | null;
+  rich_content: Record<string, unknown> | null;
   parent_id: string | null;
   idea_board_id: string;
   position_x: number;
   position_y: number;
+  color: string | null;
+  category: IdeaCategory | null;
+  is_starred: boolean;
+  is_archived: boolean;
+  promoted_to: "note" | "todo" | "project" | null;
+  promoted_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface IdeaNodeConnection {
+  id: string;
+  user_id: string;
+  idea_board_id: string;
+  from_node_id: string;
+  to_node_id: string;
+  label: string | null;
+  created_at: string;
 }
 
 export interface IdeaBoard {
@@ -186,6 +206,7 @@ export interface Habit {
   color: string;
   target_count: number;
   is_archived: boolean;
+  order_index: number;
   created_at: string;
 }
 
@@ -195,6 +216,7 @@ export interface HabitCompletion {
   user_id: string;
   completed_date: string;
   count: number;
+  note: string | null;
   created_at: string;
 }
 
@@ -217,6 +239,8 @@ export interface Bookmark {
   tags: string[];
   is_read: boolean;
   is_favorite: boolean;
+  collection: string | null;
+  favicon: string | null;
   created_at: string;
 }
 

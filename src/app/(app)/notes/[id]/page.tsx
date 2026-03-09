@@ -5,6 +5,7 @@ import { NoteTagManager } from "@/components/notes/note-tag-manager";
 import { NoteConnections } from "@/components/notes/note-connections";
 import { NoteAITools } from "@/components/notes/note-ai-tools";
 import { GenerateFlashcardsButton } from "@/components/notes/generate-flashcards-button";
+import { CreateTodoFromNoteButton } from "@/components/notes/create-todo-from-note-button";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -72,6 +73,10 @@ export default async function NotePage({
             noteId={note.id}
             noteTitle={note.title}
             noteContent={note.content as Record<string, unknown> | null}
+          />
+          <CreateTodoFromNoteButton
+            noteId={note.id}
+            noteTitle={note.title}
           />
         </div>
       </div>

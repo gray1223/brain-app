@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { JournalEditor } from "@/components/journal/journal-editor";
+import { JournalHabitsSummary } from "@/components/journal/journal-habits-summary";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -53,6 +54,8 @@ export default async function JournalDatePage({ params }: JournalDatePageProps) 
           <p className="text-sm text-muted-foreground">Journal Entry</p>
         </div>
       </div>
+
+      <JournalHabitsSummary date={date} />
 
       <JournalEditor
         entryId={entry?.id ?? null}

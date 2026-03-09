@@ -28,15 +28,21 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Plus, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import type { TodoList } from "@/types/database";
+import type { TodoList, Project } from "@/types/database";
 
-export function CreateTodoDialog({ lists }: { lists: TodoList[] }) {
+interface CreateTodoDialogProps {
+  lists: TodoList[];
+  projects?: Project[];
+}
+
+export function CreateTodoDialog({ lists, projects = [] }: CreateTodoDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [listId, setListId] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -47,6 +53,7 @@ export function CreateTodoDialog({ lists }: { lists: TodoList[] }) {
     setPriority("medium");
     setDueDate(undefined);
     setListId("");
+    setProjectId("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -65,7 +72,21 @@ export function CreateTodoDialog({ lists }: { lists: TodoList[] }) {
       priority,
       due_date: dueDate ? dueDate.toISOString() : null,
       list_id: listId || null,
+      project_id: projectId || null,
     });
+
+    // If assigned to a project, also create a project_task so it appears on the Kanban board
+    if (projectId) {
+      await supabase.from("project_tasks").insert({
+        project_id: projectId,
+        user_id: user.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        status: "todo",
+        order_index: 0,
+        due_date: dueDate ? dueDate.toISOString() : null,
+      });
+    }
 
     setSaving(false);
     resetForm();
@@ -149,6 +170,31 @@ export function CreateTodoDialog({ lists }: { lists: TodoList[] }) {
                 </Select>
               </div>
             </div>
+
+            {projects.length > 0 && (
+              <div className="space-y-2">
+                <Label>Project</Label>
+                <Select value={projectId} onValueChange={(val) => setProjectId(val ?? "")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="No project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No project</SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.color && (
+                          <span
+                            className="mr-1.5 inline-block size-2 rounded-full"
+                            style={{ backgroundColor: project.color }}
+                          />
+                        )}
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Due Date</Label>

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { subDays, format } from "date-fns";
 import { Target } from "lucide-react";
-import { HabitRow } from "@/components/habits/habit-row";
+import { HabitList } from "@/components/habits/habit-list";
 import { CreateHabitDialog } from "@/components/habits/create-habit-dialog";
 import type { Habit, HabitCompletion } from "@/types/database";
 
@@ -23,6 +23,7 @@ export default async function HabitsPage() {
       .from("habits")
       .select("*")
       .eq("is_archived", false)
+      .order("order_index", { ascending: true })
       .order("created_at", { ascending: true }),
     supabase
       .from("habit_completions")
@@ -48,6 +49,12 @@ export default async function HabitsPage() {
     return todayC && todayC.count >= h.target_count;
   });
 
+  // Serialize completions map for client component
+  const completionsMap: Record<string, HabitCompletion[]> = {};
+  for (const habit of allHabits) {
+    completionsMap[habit.id] = completionsByHabit.get(habit.id) || [];
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
@@ -69,15 +76,7 @@ export default async function HabitsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {allHabits.map((habit) => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              completions={completionsByHabit.get(habit.id) || []}
-            />
-          ))}
-        </div>
+        <HabitList habits={allHabits} completionsMap={completionsMap} />
       )}
     </div>
   );
