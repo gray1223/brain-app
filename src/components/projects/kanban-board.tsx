@@ -290,7 +290,7 @@ function TaskCard({
 
   return (
     <Card
-      className={`group relative cursor-grab p-3 active:cursor-grabbing ${
+      className={`group relative cursor-grab overflow-visible p-3 active:cursor-grabbing ${
         isDragging ? "opacity-40" : ""
       }`}
       draggable
